@@ -31,11 +31,12 @@ func getStats(couch *cbmgr.Couchbase) {
 			continue
 		}
 		log.Println(monStats)
-		for _, v := range monStats {
+		for itemName, v := range monStats {
 			log.Println("BucketName:", bucket.BucketName, v)
 			for _, item := range v.Value {
+				// TODO: нужно проверять числа вида 2.28170137e+08 и приводить их к сайзингу
 				val := item[len(item)-1]
-				Stats.WithLabelValues(bucket.BucketName, v.Name).Set(val)
+				Stats.WithLabelValues(bucket.BucketName, itemName).Set(val)
 			}
 		}
 	}
