@@ -33,6 +33,9 @@ func main() {
 	prometheus.Register(ReplicaNumber)
 	prometheus.Register(Stats)
 	prometheus.Register(Quota)
+	prometheus.Register(ClusterStats)
+	prometheus.Register(ClusterQuota)
+
 	if *Version {
 		fmt.Println(version.Show())
 		os.Exit(0)
@@ -49,16 +52,12 @@ func main() {
 	couchCluster.SetEndpoints([]string{*nodeURL})
 	go func() {
 		for {
-			getStats(couchCluster)
+			getBucketStats(couchCluster)
+			getClusterStats(couchCluster)
 			//тут надо добавить duration снаружи, что бы указать, как часто опрашивать кластер
 			time.Sleep(5 * time.Second)
 		}
 	}()
-	clstInf, err := couchCluster.ClusterInfo()
-	if err != nil {
-		log.Println(err)
-	}
-	fmt.Printf("%+v\n", clstInf)
 
 	http.Handle("/metrics", promhttp.Handler())
 	server := &http.Server{

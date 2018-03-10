@@ -6,7 +6,7 @@ import (
 	"github.com/lelvisl/gocbmgr"
 )
 
-func getStats(couch *cbmgr.Couchbase) {
+func getBucketStats(couch *cbmgr.Couchbase) {
 	buckets, err := couch.GetBuckets()
 	if err != nil {
 		log.Println(err)
@@ -37,4 +37,20 @@ func getStats(couch *cbmgr.Couchbase) {
 		}
 	}
 
+}
+
+func getClusterStats(couch *cbmgr.Couchbase) {
+	clstInf, err := couch.ClusterInfo()
+	if err != nil {
+		log.Printf("getClusterStats error:%s", err.Error())
+	}
+	if clstInf.Balanced {
+		ClusterStats.WithLabelValues("balanced").Set(0)
+	} else {
+		ClusterStats.WithLabelValues("balanced").Set(1)
+	}
+	//RebalaceStatus ????
+	ClusterQuota.WithLabelValues("DataMemoryQuotaMB").Set(float64(clstInf.DataMemoryQuotaMB))
+	ClusterQuota.WithLabelValues("IndexMemoryQuotaMB").Set(float64(clstInf.IndexMemoryQuotaMB))
+	ClusterQuota.WithLabelValues("SearchMemoryQuotaMB").Set(float64(clstInf.SearchMemoryQuotaMB))
 }
