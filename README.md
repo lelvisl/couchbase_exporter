@@ -1,6 +1,6 @@
 ## couchbase_exporter
 
-https://travis-ci.org/lelvisl/couchbase_exporter.svg?branch=develop
+[![Build Status](https://travis-ci.org/lelvisl/couchbase_exporter.svg?branch=develop)](https://travis-ci.org/lelvisl/couchbase_exporter)
 
 Couchbase Exporter for prometheus implemented using [gocbmgr](https://github.com/lelvisl/gocbmgr)
 
