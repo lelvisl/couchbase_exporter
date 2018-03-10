@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -19,17 +18,23 @@ import (
 )
 
 var (
-	listenAddress = flag.String("web.listen-address", ":9131", "Address to listen on for web interface and telemetry.")
-	metricUri     = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
-	nodeName      = flag.String("node.name", "", "Hostname to filter node metrics.")
-	nodeURL       = flag.String("node.url", "http://localhost:8091", "DB Url")
-	nodeAuth      = flag.String("node.auth", "", "Couchbase auth - login:password")
-	Version       = flag.Bool("version", false, "show version")
+	Version        = flag.Bool("version", false, "show version")
+	ConfigFileName = flag.String("config", "config.toml", "config file in toml format")
+)
+
+var (
+	// Config
+	Configuration Config
 )
 
 func main() {
-	var login, password string
-	flag.Parse()
+	var (
+		couchCluster *cbmgr.Couchbase
+	)
+	if ok, err := configure("init"); !ok {
+		log.Println(err)
+		os.Exit(-5)
+	}
 	prometheus.Register(ReplicaNumber)
 	prometheus.Register(Stats)
 	prometheus.Register(Quota)
@@ -41,27 +46,32 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(*nodeAuth) > 0 {
-		login = strings.Split(*nodeAuth, ":")[0]
-		password = strings.Split(*nodeAuth, ":")[1]
+	log.Println(Configuration)
+	//if len(*nodeAuth) > 0 {
+	//login = strings.Split(*nodeAuth, ":")[0]
+	//password = strings.Split(*nodeAuth, ":")[1]
+	if len(Configuration.Core.Username) != 0 || len(Configuration.Core.Password) != 0 {
+		couchCluster = cbmgr.New(
+			Configuration.Core.Username,
+			Configuration.Core.Password,
+		)
+		couchCluster.SetEndpoints(Configuration.Core.NodeURL)
 	} else {
 		flag.PrintDefaults()
 		os.Exit(254)
 	}
-	couchCluster := cbmgr.New(login, password)
-	couchCluster.SetEndpoints([]string{*nodeURL})
 	go func() {
 		for {
 			getBucketStats(couchCluster)
 			getClusterStats(couchCluster)
 			//тут надо добавить duration снаружи, что бы указать, как часто опрашивать кластер
-			time.Sleep(5 * time.Second)
+			time.Sleep(Configuration.Core.RefreshInterval.Duration)
 		}
 	}()
 
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(Configuration.Core.MetricUri, promhttp.Handler())
 	server := &http.Server{
-		Addr: *listenAddress,
+		Addr: Configuration.Core.getAddress(),
 	}
 
 	signals := make(chan os.Signal, 1)
