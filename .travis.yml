@@ -3,7 +3,6 @@ language: go
 go:
   - "1.10.x"
 before_install:
-  - go get -v github.com/lelvisl/gocbmgr
-  - go get -v github.com/prometheus/client_golang/prometheus
+  - go get -v ./...
 script:
   - make
