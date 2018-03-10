@@ -1,0 +1,9 @@
+node:
+  auth: user:password
+  urls:  
+  - http://localhost:8091
+  - http://localhost:8092
+  name: some_name
+web:
+  listen-address: :9131
+  telemetry-path: /metrics

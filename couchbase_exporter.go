@@ -19,17 +19,14 @@ import (
 )
 
 var (
-	listenAddress = flag.String("web.listen-address", ":9131", "Address to listen on for web interface and telemetry.")
-	metricUri     = flag.String("web.telemetry-path", "/metrics", "Path under which to expose metrics.")
-	nodeName      = flag.String("node.name", "", "Hostname to filter node metrics.")
-	nodeURL       = flag.String("node.url", "http://localhost:8091", "DB Url")
-	nodeAuth      = flag.String("node.auth", "", "Couchbase auth - login:password")
-	Version       = flag.Bool("version", false, "show version")
+	configPath = flag.String("config", "./config.yml", "Config")
+	Version    = flag.Bool("version", false, "show version")
 )
 
 func main() {
 	var login, password string
 	flag.Parse()
+
 	prometheus.Register(ReplicaNumber)
 	prometheus.Register(Stats)
 	prometheus.Register(Quota)
@@ -40,16 +37,21 @@ func main() {
 		fmt.Println(version.Show())
 		os.Exit(0)
 	}
+	c, err := configure(*configPath)
+	if err != nil {
+		log.Println("Configure err: %s", err.Error())
+		os.Exit(2)
+	}
 
-	if len(*nodeAuth) > 0 {
-		login = strings.Split(*nodeAuth, ":")[0]
-		password = strings.Split(*nodeAuth, ":")[1]
+	if len(c.node.auth) > 0 {
+		login = strings.Split(c.node.auth, ":")[0]
+		password = strings.Split(c.node.auth, ":")[1]
 	} else {
 		flag.PrintDefaults()
 		os.Exit(254)
 	}
 	couchCluster := cbmgr.New(login, password)
-	couchCluster.SetEndpoints([]string{*nodeURL})
+	couchCluster.SetEndpoints(c.node.urls)
 	go func() {
 		for {
 			getBucketStats(couchCluster)
@@ -59,9 +61,9 @@ func main() {
 		}
 	}()
 
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(c.web.metricURI, promhttp.Handler())
 	server := &http.Server{
-		Addr: *listenAddress,
+		Addr: c.web.listenAddress,
 	}
 
 	signals := make(chan os.Signal, 1)
