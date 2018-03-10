@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/lelvisl/couchbase_exporter/version"
 	"github.com/lelvisl/gocbmgr"
@@ -44,11 +45,20 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(254)
 	}
-	//couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
-	//	couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
 	couchCluster := cbmgr.New(login, password)
 	couchCluster.SetEndpoints([]string{*nodeURL})
-	getStats(couchCluster)
+	go func() {
+		for {
+			getStats(couchCluster)
+			//тут надо добавить duration снаружи, что бы указать, как часто опрашивать кластер
+			time.Sleep(5 * time.Second)
+		}
+	}()
+	clstInf, err := couchCluster.ClusterInfo()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Printf("%+v\n", clstInf)
 
 	http.Handle("/metrics", promhttp.Handler())
 	server := &http.Server{
