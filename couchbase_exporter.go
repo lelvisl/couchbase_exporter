@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/lelvisl/couchbase_exporter/version"
 	"github.com/lelvisl/gocbmgr"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"golang.org/x/net/context"
 	"log"
 	"net/http"
 	"os"
