@@ -3,3 +3,4 @@
 .idea/
 couchbase_exporter
 README.md
+config.toml
