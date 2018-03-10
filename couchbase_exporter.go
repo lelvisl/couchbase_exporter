@@ -4,16 +4,17 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/lelvisl/couchbase_exporter/version"
-	"github.com/lelvisl/gocbmgr"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/lelvisl/couchbase_exporter/version"
+	"github.com/lelvisl/gocbmgr"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
@@ -43,7 +44,10 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(254)
 	}
-	couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
+	//couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
+	//	couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
+	couchCluster := cbmgr.New(login, password)
+	couchCluster.SetEndpoints([]string{*nodeURL})
 	getStats(couchCluster)
 
 	http.Handle("/metrics", promhttp.Handler())
