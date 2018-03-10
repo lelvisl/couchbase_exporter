@@ -1,9 +1,12 @@
 node:
-  auth: user:password
-  urls:  
+  auth:
+    user: user
+    password: password
+  urls:
   - http://localhost:8091
   - http://localhost:8092
   name: some_name
+  duration: 5s
 web:
-  listen-address: :9131
-  telemetry-path: /metrics
+  adress: :9131
+  uri: /metrics

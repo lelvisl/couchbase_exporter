@@ -1,20 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
 type config struct {
-	node struct {
-		auth string
-		urls []string
-		name string
+	Node struct {
+		Auth struct {
+			User     string
+			Password string
+		}
+		URLs    []string
+		Name    string
+		Refresh time.Duration
 	}
-	web struct {
-		listenAddress string `yaml:listen-address`
-		metricURI     string `yaml:telemetry-path`
+	Web struct {
+		Adress string
+		URI    string
 	}
 }
 
@@ -27,6 +33,19 @@ func configure(filePath string) (config, error) {
 	err = yaml.Unmarshal(file, &c)
 	if err != nil {
 		return c, err
+	}
+	if len(c.Node.URLs) == 0 {
+		return c, fmt.Errorf("Can't find cluster urls in config\n")
+	}
+	//defaults
+	if c.Web.Adress == "" {
+		c.Web.Adress = ":9131"
+	}
+	if c.Web.URI == "" {
+		c.Web.URI = "/metrics"
+	}
+	if c.Node.Refresh == 0 {
+		c.Node.Refresh = 5 * time.Second
 	}
 	return c, nil
 }

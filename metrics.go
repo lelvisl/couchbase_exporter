@@ -3,7 +3,7 @@ package main
 import "github.com/prometheus/client_golang/prometheus"
 
 var (
-	ReplicaNumber = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	replicaNumber = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "couchbase",
 		Subsystem: "bucket",
 		Name:      "replica",
@@ -11,7 +11,7 @@ var (
 	},
 		[]string{"bucket"},
 	)
-	Quota = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	quota = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "couchbase",
 		Subsystem: "bucket",
 		Name:      "quota",
@@ -20,7 +20,7 @@ var (
 		[]string{"bucket", "type"},
 	)
 
-	Stats = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	stats = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "couchbase",
 		Subsystem: "bucket",
 		Name:      "stats",
@@ -28,7 +28,7 @@ var (
 	},
 		[]string{"bucket", "item"},
 	)
-	ClusterStats = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	clusterStats = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "couchbase",
 		Subsystem: "cluster",
 		Name:      "stats",
@@ -36,7 +36,7 @@ var (
 	},
 		[]string{"item"},
 	)
-	ClusterQuota = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+	clusterQuota = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "couchbase",
 		Subsystem: "cluster",
 		Name:      "quota",
