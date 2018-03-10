@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/lelvisl/couchbase_exporter/version"
 	"github.com/lelvisl/gocbmgr"
@@ -32,6 +33,9 @@ func main() {
 	prometheus.Register(ReplicaNumber)
 	prometheus.Register(Stats)
 	prometheus.Register(Quota)
+	prometheus.Register(ClusterStats)
+	prometheus.Register(ClusterQuota)
+
 	if *Version {
 		fmt.Println(version.Show())
 		os.Exit(0)
@@ -44,11 +48,16 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(254)
 	}
-	//couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
-	//	couchCluster := cbmgr.New([]string{*nodeURL}, login, password, nil)
 	couchCluster := cbmgr.New(login, password)
 	couchCluster.SetEndpoints([]string{*nodeURL})
-	getStats(couchCluster)
+	go func() {
+		for {
+			getBucketStats(couchCluster)
+			getClusterStats(couchCluster)
+			//тут надо добавить duration снаружи, что бы указать, как часто опрашивать кластер
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	http.Handle("/metrics", promhttp.Handler())
 	server := &http.Server{
