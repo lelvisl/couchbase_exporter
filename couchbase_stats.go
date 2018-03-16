@@ -18,9 +18,9 @@ func getBucketStats(couch *cbmgr.Couchbase) {
 			continue
 		}
 		for k, v := range stat.Quota {
-			Quota.WithLabelValues(bucket.BucketName, k).Set(float64(v))
+			quota.WithLabelValues(bucket.BucketName, k).Set(float64(v))
 		}
-		ReplicaNumber.WithLabelValues(bucket.BucketName).Set(float64(stat.ReplicaNumber))
+		replicaNumber.WithLabelValues(bucket.BucketName).Set(float64(stat.ReplicaNumber))
 		//example - пример вывода stats
 		//TODO: подумать, как это завернуть в метрики прома. Пока думаю, что надо прать первый семпл, и отдавать его как метрику за минуту. (учитывая что семплы мы за минуту и выбираем по дефолту)
 		monStats, err := couch.GetBucketStats(bucket.BucketName)
@@ -32,7 +32,7 @@ func getBucketStats(couch *cbmgr.Couchbase) {
 			for _, item := range v.Value {
 				// TODO: нужно проверять числа вида 2.28170137e+08 и приводить их к сайзингу
 				val := item[len(item)-1]
-				Stats.WithLabelValues(bucket.BucketName, itemName).Set(val)
+				stats.WithLabelValues(bucket.BucketName, itemName).Set(val)
 			}
 		}
 	}
@@ -45,12 +45,12 @@ func getClusterStats(couch *cbmgr.Couchbase) {
 		log.Printf("getClusterStats error:%s", err.Error())
 	}
 	if clstInf.Balanced {
-		ClusterStats.WithLabelValues("balanced").Set(0)
+		clusterStats.WithLabelValues("balanced").Set(0)
 	} else {
-		ClusterStats.WithLabelValues("balanced").Set(1)
+		clusterStats.WithLabelValues("balanced").Set(1)
 	}
 	//RebalaceStatus ????
-	ClusterQuota.WithLabelValues("DataMemoryQuotaMB").Set(float64(clstInf.DataMemoryQuotaMB))
-	ClusterQuota.WithLabelValues("IndexMemoryQuotaMB").Set(float64(clstInf.IndexMemoryQuotaMB))
-	ClusterQuota.WithLabelValues("SearchMemoryQuotaMB").Set(float64(clstInf.SearchMemoryQuotaMB))
+	clusterQuota.WithLabelValues("DataMemoryQuotaMB").Set(float64(clstInf.DataMemoryQuotaMB))
+	clusterQuota.WithLabelValues("IndexMemoryQuotaMB").Set(float64(clstInf.IndexMemoryQuotaMB))
+	clusterQuota.WithLabelValues("SearchMemoryQuotaMB").Set(float64(clstInf.SearchMemoryQuotaMB))
 }
