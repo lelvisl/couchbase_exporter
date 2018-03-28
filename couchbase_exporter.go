@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "./config.yml", "Config")
-	v          = flag.Bool("version", false, "show version")
+	configFileName = flag.String("config", "./config.yml", "Config")
+	v              = flag.Bool("version", false, "show version")
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 		fmt.Println(version.Show())
 		os.Exit(0)
 	}
-	c, err := configure(*configPath)
+	c, err := configure(*configFileName)
 	if err != nil {
 		log.Printf("Configure err: %s\n", err.Error())
 		os.Exit(2)
