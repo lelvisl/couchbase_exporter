@@ -1,7 +1,7 @@
 PROJECT?=github.com/lelvisl/couchbase_exporter
 APP?=couchbase_exporter
 
-RELEASE?=$(shell git describe --tags || echo 0.0.1)
+RELEASE?=$(shell git describe --tags 2>/dev/null || echo 0.0.1)
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date '+%Y-%m-%d_%H:%M:%S')
 CONTAINER_IMAGE?=docker.io/webdeva/${APP}

@@ -6,13 +6,15 @@ import (
 	"time"
 
 	yaml "gopkg.in/yaml.v2"
+	"log"
+	"os"
 )
 
 type config struct {
 	Node struct {
 		Auth struct {
-			User     string
-			Password string
+			User     string `yaml:"-"`
+			Password string `yaml:"-"`
 		}
 		URLs    []string
 		Name    string
@@ -33,6 +35,12 @@ func configure(filePath string) (config, error) {
 	err = yaml.Unmarshal(file, &c)
 	if err != nil {
 		return c, err
+	}
+	if len(os.Getenv("CBE_USER")) > 0 {
+		c.Node.Auth.User = os.Getenv("CBE_USER")
+	}
+	if len(os.Getenv("CBE_PASSWORD")) > 0 {
+		c.Node.Auth.Password = os.Getenv("CBE_PASSWORD")
 	}
 	if len(c.Node.URLs) == 0 {
 		return c, fmt.Errorf("Can't find cluster urls in config\n")
