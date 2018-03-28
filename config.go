@@ -6,7 +6,6 @@ import (
 	"time"
 
 	yaml "gopkg.in/yaml.v2"
-	"log"
 	"os"
 )
 
