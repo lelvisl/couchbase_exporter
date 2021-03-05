@@ -1,4 +1,5 @@
 package version
+import _ "embed"
 
 var (
 	// BuildTime is a time label of the moment when the binary was built
@@ -6,7 +7,8 @@ var (
 	// Commit is a last commit hash at the moment when the binary was built
 	Commit = "unset"
 	// Release is a semantic Version of current build
-	Release = "unset"
+	//go:embed version
+	Release string
 )
 
 func Show() string {
